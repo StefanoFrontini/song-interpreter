@@ -2,6 +2,7 @@ import * as ChordLiteral from "#root/src/ast/chordLiteral.ts";
 import * as Expression from "#root/src/ast/expression.ts";
 import * as ExpressionStatement from "#root/src/ast/expressionStatement.ts";
 import * as InfixExpression from "#root/src/ast/infixExpression.ts";
+import * as Program from "#root/src/ast/program.ts";
 import * as StringLiteral from "#root/src/ast/stringLiteral.ts";
 import * as Lexer from "#root/src/lexer/lexer.ts";
 import * as Parser from "#root/src/parser/parser.ts";
@@ -153,6 +154,63 @@ describe("Parser", () => {
       );
       testStringLiteral(ie.left, tt.leftValue);
       testChordLiteral(ie.right, tt.rightValue);
+    }
+  });
+  it("TestOperatorPrecedenceParsing", async () => {
+    const tests = [
+      {
+        input: "abc[C]cde[D]",
+        expected: "(abc(C(cdeD)))",
+      },
+    ];
+    for (const tt of tests) {
+      const l = Lexer.init(tt.input);
+      const p = Parser.init(l);
+      const program = Parser.parseProgram(p);
+      // assert.strictEqual(
+      //   p.errors.length,
+      //   0,
+      //   `Parser.errors() returned ${p.errors.length} errors:\n${p.errors.join(
+      //     "\n"
+      //   )}`
+      // );
+      assert.notStrictEqual(
+        program,
+        null,
+        "Parser.parseProgram() returned null"
+      );
+      console.dir(program.statements, { depth: null });
+      assert.strictEqual(
+        program.statements.length,
+        1,
+        `
+          program.statements has not enough statements. got=${program.statements.length}`
+      );
+      assert.strictEqual(
+        program.statements[0]["tag"],
+        "expressionStatement",
+        `program.statements[0] is not an ExpressionStatement. got=${program.statements[0]["tag"]}`
+      );
+      const actual = await Program.string(program);
+      assert.strictEqual(
+        actual,
+        tt.expected,
+        `actual is not '${tt.expected}'. got=${actual}`
+      );
+
+      //   const exprStmt = program.statements[0] as ExpressionStatement.t;
+      //   assert.strictEqual(
+      //     exprStmt.expression["tag"],
+      //     "infixExpression",
+      //     `exprStmt.expression is not an InfixExpression. got=${exprStmt.expression["tag"]}`
+      //   );
+      //   const ie = exprStmt.expression as InfixExpression.t;
+      //   assert.strictEqual(
+      //     ie["tag"],
+      //     "infixExpression",
+      //     `ie is not an InfixExpression. got=${ie["tag"]}`
+      //   );
+      //   testStringLiteral(ie.left, tt.expected);
     }
   });
 });
