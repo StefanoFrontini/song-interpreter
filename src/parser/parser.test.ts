@@ -146,8 +146,13 @@ describe("Parser", () => {
         `exprStmt.expression is not an InfixExpression. got=${exprStmt.expression["tag"]}`
       );
       const ie = exprStmt.expression as InfixExpression.t;
-      testStringLiteral(ie, tt.leftValue);
-      testChordLiteral(ie, tt.rightValue);
+      assert.strictEqual(
+        ie["tag"],
+        "infixExpression",
+        `ie is not an InfixExpression. got=${ie["tag"]}`
+      );
+      testStringLiteral(ie.left, tt.leftValue);
+      testChordLiteral(ie.right, tt.rightValue);
     }
   });
 });

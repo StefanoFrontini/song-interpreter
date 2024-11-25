@@ -1,6 +1,7 @@
 import * as ChordLiteral from "#root/src/ast/chordLiteral.ts";
 import * as Expression from "#root/src/ast/expression.ts";
 import * as ExpressionStatement from "#root/src/ast/expressionStatement.ts";
+import * as NullLiteral from "#root/src/ast/nullLiteral.ts";
 import * as Program from "#root/src/ast/program.ts";
 import * as Statement from "#root/src/ast/statement.ts";
 import * as StringLiteral from "#root/src/ast/stringLiteral.ts";
@@ -83,7 +84,13 @@ const parseInfixExpression = (
   };
   const precedence = curPrecedence(p);
   nextToken(p);
-  expression["right"] = parseExpression(p, precedence);
+  expression["right"] =
+    parseExpression(p, precedence) ??
+    ({
+      tag: "nullLiteral",
+      token: p.curToken,
+      value: "",
+    } as NullLiteral.t);
   return expression as Expression.t;
 };
 
@@ -145,7 +152,7 @@ const parseExpression = (p: t, precedence: number): Expression.t | null => {
     if (!infix) {
       return leftExp;
     }
-    nextToken(p);
+    // nextToken(p);
     leftExp = infix(p, leftExp);
   }
   return leftExp;
