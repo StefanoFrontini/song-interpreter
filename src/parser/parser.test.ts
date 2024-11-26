@@ -9,7 +9,8 @@ import * as Lexer from "#root/src/lexer/lexer.ts";
 import * as Parser from "#root/src/parser/parser.ts";
 import assert from "node:assert";
 import { describe, it } from "node:test";
-const testStringLiteral = (exp: Expression.t, value: string) => {
+const testStringLiteral = (exp: Expression.t | null, value: string) => {
+  assert.ok(exp, "exp is null");
   assert.strictEqual(
     exp["tag"],
     "stringLiteral",
@@ -28,7 +29,8 @@ const testStringLiteral = (exp: Expression.t, value: string) => {
   );
 };
 
-const testChordLiteral = (exp: Expression.t, value: string) => {
+const testChordLiteral = (exp: Expression.t | null, value: string) => {
+  assert.ok(exp, "exp is null");
   assert.strictEqual(
     exp["tag"],
     "chordLiteral",
@@ -47,7 +49,8 @@ const testChordLiteral = (exp: Expression.t, value: string) => {
   );
 };
 
-const testEndoflineLiteral = (exp: Expression.t, value: string) => {
+const testEndoflineLiteral = (exp: Expression.t | null, value: string) => {
+  assert.ok(exp, "exp is null");
   assert.strictEqual(
     exp["tag"],
     "endoflineLiteral",
@@ -160,6 +163,7 @@ describe("Parser", () => {
       );
 
       const exprStmt = program.statements[0] as ExpressionStatement.t;
+      assert.ok(exprStmt.expression, "exprStmt.expression is null");
       assert.strictEqual(
         exprStmt.expression["tag"],
         "infixExpression",

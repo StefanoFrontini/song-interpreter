@@ -3,7 +3,7 @@ import * as Token from "#root/src/token/token.ts";
 export interface t {
   tag: "expressionStatement";
   token: Token.t;
-  expression: Expression.t;
+  expression: Expression.t | null;
 }
 
 export const tokenLiteral = (e: t): string => e.token.literal;

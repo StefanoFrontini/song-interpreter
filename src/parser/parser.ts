@@ -96,15 +96,15 @@ const parseInfixExpression = (
   p: t,
   left: Expression.t | null
 ): Expression.t => {
-  let expression = {
-    tag: "infixExpression",
-    token: p.curToken,
-    left: left,
-  };
   const precedence = curPrecedence(p);
   nextToken(p);
-  expression["right"] = parseExpression(p, precedence);
-  return expression as Expression.t;
+  const right = parseExpression(p, precedence);
+  return {
+    tag: "infixExpression",
+    token: p.curToken,
+    left,
+    right,
+  } satisfies Expression.t;
 };
 
 export const init = (l: Lexer.t): t => {
@@ -173,12 +173,11 @@ const parseExpression = (p: t, precedence: number): Expression.t | null => {
 };
 
 const parseExpressionStatement = (p: t): ExpressionStatement.t => {
-  let stmt = {
+  return {
     tag: "expressionStatement",
     token: p.curToken,
     expression: parseExpression(p, LOWEST),
-  };
-  return stmt as ExpressionStatement.t;
+  } satisfies ExpressionStatement.t;
 };
 
 const parseStatement = (p: t): Statement.t | null => {
