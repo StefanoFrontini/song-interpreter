@@ -46,19 +46,23 @@ const testChordLiteral = (exp: Expression.t, value: string) => {
   );
 };
 
+const checkParserErrors = (p: Parser.t) => {
+  assert.strictEqual(
+    p.errors.length,
+    0,
+    `Parser.errors() returned ${p.errors.length} errors:\n${p.errors.join(
+      "\n"
+    )}`
+  );
+};
+
 describe("Parser", () => {
   it("TestStringLiteral", () => {
     const input = "foobar";
     const l = Lexer.init(input);
     const p = Parser.init(l);
     const program = Parser.parseProgram(p);
-    // assert.strictEqual(
-    //   p.errors.length,
-    //   0,
-    //   `Parser.errors() returned ${p.errors.length} errors:\n${p.errors.join(
-    //     "\n"
-    //   )}`
-    // );
+    checkParserErrors(p);
     assert.notStrictEqual(program, null, "Parser.parseProgram() returned null");
     assert.strictEqual(
       program.statements.length,
@@ -80,13 +84,7 @@ describe("Parser", () => {
     const l = Lexer.init(input);
     const p = Parser.init(l);
     const program = Parser.parseProgram(p);
-    // assert.strictEqual(
-    //   p.errors.length,
-    //   0,
-    //   `Parser.errors() returned ${p.errors.length} errors:\n${p.errors.join(
-    //     "\n"
-    //   )}`
-    // );
+    checkParserErrors(p);
     assert.notStrictEqual(program, null, "Parser.parseProgram() returned null");
     assert.strictEqual(
       program.statements.length,
@@ -115,13 +113,7 @@ describe("Parser", () => {
       const l = Lexer.init(tt.input);
       const p = Parser.init(l);
       const program = Parser.parseProgram(p);
-      // assert.strictEqual(
-      //   p.errors.length,
-      //   0,
-      //   `Parser.errors() returned ${p.errors.length} errors:\n${p.errors.join(
-      //     "\n"
-      //   )}`
-      // );
+      checkParserErrors(p);
       assert.notStrictEqual(
         program,
         null,
@@ -167,13 +159,7 @@ describe("Parser", () => {
       const l = Lexer.init(tt.input);
       const p = Parser.init(l);
       const program = Parser.parseProgram(p);
-      // assert.strictEqual(
-      //   p.errors.length,
-      //   0,
-      //   `Parser.errors() returned ${p.errors.length} errors:\n${p.errors.join(
-      //     "\n"
-      //   )}`
-      // );
+      checkParserErrors(p);
       assert.notStrictEqual(
         program,
         null,
@@ -196,20 +182,6 @@ describe("Parser", () => {
         tt.expected,
         `actual is not '${tt.expected}'. got=${actual}`
       );
-
-      //   const exprStmt = program.statements[0] as ExpressionStatement.t;
-      //   assert.strictEqual(
-      //     exprStmt.expression["tag"],
-      //     "infixExpression",
-      //     `exprStmt.expression is not an InfixExpression. got=${exprStmt.expression["tag"]}`
-      //   );
-      //   const ie = exprStmt.expression as InfixExpression.t;
-      //   assert.strictEqual(
-      //     ie["tag"],
-      //     "infixExpression",
-      //     `ie is not an InfixExpression. got=${ie["tag"]}`
-      //   );
-      //   testStringLiteral(ie.left, tt.expected);
     }
   });
 });

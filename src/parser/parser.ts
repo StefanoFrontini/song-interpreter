@@ -19,18 +19,28 @@ export type t = {
   l: Lexer.t;
   curToken: Token.t;
   peekToken: Token.t;
-  //   errors: string[];
+  errors: string[];
   prefixParseFns: Map<Token.TokenType, (p: t) => Expression.t | null>;
   infixParseFns: Map<
     Token.TokenType,
     (p: t, left: Expression.t) => Expression.t
   >;
-
-  // infixParseFns: Map<
-  //   Token.TokenType,
-  //   (p: t, left: Expression.t | null) => Expression.t
-  // >;
 };
+
+// const peekError = (p: t, tokenType: Token.TokenType): void => {
+//   const msg = `expected next token to be ${tokenType}, got ${p.peekToken.type} instead`;
+//   p.errors.push(msg);
+// };
+
+// const expectPeek = (p: t, tokenType: Token.TokenType): boolean => {
+//   if (peekTokenIs(p, tokenType)) {
+//     nextToken(p);
+//     return true;
+//   } else {
+//     peekError(p, tokenType);
+//     return false;
+//   }
+// };
 
 const peekPrecedence = (p: t): number => {
   if (!p.peekToken) return LOWEST;
@@ -98,11 +108,7 @@ export const init = (l: Lexer.t): t => {
       Token.TokenType,
       (p: t, left: Expression.t) => Expression.t
     >(),
-    //   errors: [],
-    // infixParseFns: new Map<
-    //   Token.TokenType,
-    //   (p: t, left: Expression.t | null) => Expression.t
-    // >(),
+    errors: [],
   };
   registerPrefix(p, Token.STRING, parseStringLiteral);
   registerPrefix(p, Token.CHORD, parseChordLiteral);
@@ -126,6 +132,10 @@ export const nextToken = (p: t): void => {
 //   expression["right"] = parseExpression(p, PREFIX);
 //   return expression as PrefixExpression.t;
 // };
+const noPrefixParseFnError = (p: t, tokenType: Token.TokenType): void => {
+  const msg = `no prefix parse function for ${tokenType} found`;
+  p.errors.push(msg);
+};
 
 const peekTokenIs = (p: t, tokenType: Token.TokenType): boolean => {
   return p.peekToken.type === tokenType;
@@ -134,7 +144,7 @@ const peekTokenIs = (p: t, tokenType: Token.TokenType): boolean => {
 const parseExpression = (p: t, precedence: number): Expression.t | null => {
   const prefix = p.prefixParseFns.get(p.curToken.type);
   if (!prefix) {
-    // noPrefixParseFnError(p, p.curToken.type);
+    noPrefixParseFnError(p, p.curToken.type);
     return null;
   }
   let leftExp = prefix(p);
