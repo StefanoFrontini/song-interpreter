@@ -7,11 +7,12 @@ import * as StringLiteral from "#root/src/ast/stringLiteral.ts";
 import * as Lexer from "#root/src/lexer/lexer.ts";
 import * as Token from "#root/src/token/token.ts";
 
-const LOWEST = 1;
+const LOWEST = 1,
+  EQUALS = 2;
 
 const precedences = new Map<Token.TokenType, number>([
-  [Token.CHORD, LOWEST],
-  [Token.STRING, LOWEST],
+  [Token.CHORD, EQUALS],
+  [Token.STRING, EQUALS],
 ]);
 
 export type t = {
@@ -138,9 +139,8 @@ const parseExpression = (p: t, precedence: number): Expression.t | null => {
   }
   let leftExp = prefix(p);
   if (leftExp === null) return null;
-  console.log("leftExp", leftExp);
 
-  while (!peekTokenIs(p, Token.EOF)) {
+  while (!peekTokenIs(p, Token.EOF) && precedence < peekPrecedence(p)) {
     const infix = p.infixParseFns.get(p.peekToken.type);
     if (!infix) {
       return leftExp;

@@ -160,7 +160,7 @@ describe("Parser", () => {
     const tests = [
       {
         input: "abc[C]cde[D]",
-        expected: "(abc(C(cdeD)))",
+        expected: "(((abcC)cde)D)",
       },
     ];
     for (const tt of tests) {
@@ -179,7 +179,6 @@ describe("Parser", () => {
         null,
         "Parser.parseProgram() returned null"
       );
-      console.dir(program.statements, { depth: null });
       assert.strictEqual(
         program.statements.length,
         1,
