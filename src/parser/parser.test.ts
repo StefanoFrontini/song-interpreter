@@ -1,4 +1,5 @@
 import * as ChordLiteral from "#root/src/ast/chordLiteral.ts";
+import * as EndoflineLiteral from "#root/src/ast/endoflineLiteral.ts";
 import * as Expression from "#root/src/ast/expression.ts";
 import * as ExpressionStatement from "#root/src/ast/expressionStatement.ts";
 import * as InfixExpression from "#root/src/ast/infixExpression.ts";
@@ -43,6 +44,27 @@ const testChordLiteral = (exp: Expression.t, value: string) => {
     ChordLiteral.tokenLiteral(cl),
     value,
     `cl.tokenLiteral() is not '${value}'. got=${ChordLiteral.tokenLiteral(cl)}`
+  );
+};
+
+const testEndoflineLiteral = (exp: Expression.t, value: string) => {
+  assert.strictEqual(
+    exp["tag"],
+    "endoflineLiteral",
+    `exp is not an endoflineLiteral. got=${exp["tag"]}`
+  );
+  const el = exp as EndoflineLiteral.t;
+  assert.strictEqual(
+    el.value,
+    value,
+    `el.value is not '${value}'. got=${el.value}`
+  );
+  assert.strictEqual(
+    EndoflineLiteral.tokenLiteral(el),
+    value,
+    `el.tokenLiteral() is not '${value}'. got=${EndoflineLiteral.tokenLiteral(
+      el
+    )}`
   );
 };
 
@@ -108,8 +130,13 @@ describe("Parser", () => {
         leftValue: "abc",
         rightValue: "C",
       },
+      {
+        input: "cde\n",
+        leftValue: "cde",
+        rightValue: "\n",
+      },
     ];
-    for (const tt of tests) {
+    for (const [index, tt] of tests.entries()) {
       const l = Lexer.init(tt.input);
       const p = Parser.init(l);
       const program = Parser.parseProgram(p);
@@ -144,8 +171,14 @@ describe("Parser", () => {
         "infixExpression",
         `ie is not an InfixExpression. got=${ie["tag"]}`
       );
-      testStringLiteral(ie.left, tt.leftValue);
-      testChordLiteral(ie.right, tt.rightValue);
+      if (index === 0) {
+        testStringLiteral(ie.left, tt.leftValue);
+        testChordLiteral(ie.right, tt.rightValue);
+      }
+      if (index === 1) {
+        testStringLiteral(ie.left, tt.leftValue);
+        testEndoflineLiteral(ie.right, tt.rightValue);
+      }
     }
   });
   it("TestOperatorPrecedenceParsing", async () => {

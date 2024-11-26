@@ -1,4 +1,5 @@
 import * as ChordLiteral from "#root/src/ast/chordLiteral.ts";
+import * as EndoflineLiteral from "#root/src/ast/endoflineLiteral.ts";
 import * as Expression from "#root/src/ast/expression.ts";
 import * as ExpressionStatement from "#root/src/ast/expressionStatement.ts";
 import * as Program from "#root/src/ast/program.ts";
@@ -6,13 +7,13 @@ import * as Statement from "#root/src/ast/statement.ts";
 import * as StringLiteral from "#root/src/ast/stringLiteral.ts";
 import * as Lexer from "#root/src/lexer/lexer.ts";
 import * as Token from "#root/src/token/token.ts";
-
 const LOWEST = 1,
   EQUALS = 2;
 
 const precedences = new Map<Token.TokenType, number>([
   [Token.CHORD, EQUALS],
   [Token.STRING, EQUALS],
+  [Token.ENDOFLINE, EQUALS],
 ]);
 
 export type t = {
@@ -72,7 +73,7 @@ const parseStringLiteral = (p: t): Expression.t => {
     tag: "stringLiteral",
     token: p.curToken,
     value: p.curToken.literal,
-  } as StringLiteral.t;
+  } satisfies StringLiteral.t;
 };
 
 const parseChordLiteral = (p: t): Expression.t => {
@@ -80,14 +81,22 @@ const parseChordLiteral = (p: t): Expression.t => {
     tag: "chordLiteral",
     token: p.curToken,
     value: p.curToken.literal,
-  } as ChordLiteral.t;
+  } satisfies ChordLiteral.t;
+};
+
+const parseEndOfLineLiteral = (p: t): Expression.t => {
+  return {
+    tag: "endoflineLiteral",
+    token: p.curToken,
+    value: p.curToken.literal,
+  } satisfies EndoflineLiteral.t;
 };
 
 const parseInfixExpression = (
   p: t,
   left: Expression.t | null
 ): Expression.t => {
-  const expression = {
+  let expression = {
     tag: "infixExpression",
     token: p.curToken,
     left: left,
@@ -112,8 +121,10 @@ export const init = (l: Lexer.t): t => {
   };
   registerPrefix(p, Token.STRING, parseStringLiteral);
   registerPrefix(p, Token.CHORD, parseChordLiteral);
+  registerPrefix(p, Token.ENDOFLINE, parseEndOfLineLiteral);
   registerInfix(p, Token.STRING, parseInfixExpression);
   registerInfix(p, Token.CHORD, parseInfixExpression);
+  registerInfix(p, Token.ENDOFLINE, parseInfixExpression);
   return p;
 };
 

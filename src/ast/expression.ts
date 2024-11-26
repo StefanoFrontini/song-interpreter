@@ -1,9 +1,14 @@
 import * as ChordLiteral from "#root/src/ast/chordLiteral.ts";
+import * as EndoflineLiteral from "#root/src/ast/endoflineLiteral.ts";
 import * as InfixExpression from "#root/src/ast/infixExpression.ts";
 import * as StringLiteral from "#root/src/ast/stringLiteral.ts";
 import { Readable } from "stream";
 
-export type t = ChordLiteral.t | InfixExpression.t | StringLiteral.t;
+export type t =
+  | ChordLiteral.t
+  | InfixExpression.t
+  | StringLiteral.t
+  | EndoflineLiteral.t;
 
 export const string = async (e: t): Promise<string> => {
   let stringExpr = "";
@@ -16,6 +21,9 @@ export const string = async (e: t): Promise<string> => {
       break;
     case "chordLiteral":
       stringExpr = ChordLiteral.string(e);
+      break;
+    case "endoflineLiteral":
+      stringExpr = EndoflineLiteral.string(e);
       break;
     default:
       const _exhaustiveCheck: never = e;
