@@ -1,15 +1,22 @@
 import * as Ast from "#root/src/ast/ast.ts";
 import * as ExpressionStatement from "#root/src/ast/expressionStatement.ts";
-import * as Lyric from "#root/src/object/lyric.ts";
-import * as Obj from "#root/src/object/obj.ts";
-const evalStatements = (statements: ExpressionStatement.t[]): Obj.t | null => {
-  let result: Obj.t | null = null;
+import * as Song from "#root/src/object/song.ts";
+const evalStatements = (statements: ExpressionStatement.t[]): Song.t | null => {
+  let result: Song.t | null = null;
   for (const statement of statements) {
     result = evalNode(statement);
   }
   return result;
 };
-export const evalNode = (node: Ast.t): Obj.t | null => {
+
+const evalInfixExpression = (
+  left: Song.t | null,
+  right: Song.t | null
+): Song.t | null => {
+  if (left === null || right === null) return null;
+  return left.concat(right);
+};
+export const evalNode = (node: Ast.t): Song.t | null => {
   switch (node["tag"]) {
     case "program":
       return evalStatements(node["statements"]);
@@ -18,13 +25,37 @@ export const evalNode = (node: Ast.t): Obj.t | null => {
         return null;
       }
       return evalNode(node["expression"]);
+
     case "stringLiteral":
-      return {
-        tag: "lyric",
-        value: node["value"],
-      } satisfies Lyric.t;
-    // case "infixExpression":
-    //     return evalInfixExpression(node);
+      return [
+        {
+          tag: "lyric",
+          value: node["value"],
+        },
+      ] satisfies Song.t;
+
+    case "chordLiteral":
+      return [
+        {
+          tag: "chord",
+          value: node["value"],
+        },
+      ] satisfies Song.t;
+
+    case "endoflineLiteral":
+      return [
+        {
+          tag: "endofline",
+          value: node["value"],
+        },
+      ] satisfies Song.t;
+
+    case "infixExpression":
+      if (node.left === null || node.right === null) return null;
+      const left = evalNode(node.left);
+      const right = evalNode(node.right);
+      return evalInfixExpression(left, right);
+
     default:
       return null;
     //     const _exhaustiveCheck: never = node;

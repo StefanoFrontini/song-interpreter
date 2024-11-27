@@ -1,7 +1,6 @@
 import * as Evaluator from "#root/src/evaluator/evaluator.ts";
 import * as Lexer from "#root/src/lexer/lexer.ts";
-import * as Lyric from "#root/src/object/lyric.ts";
-import * as Obj from "#root/src/object/obj.ts";
+import * as Song from "#root/src/object/song.ts";
 import * as Parser from "#root/src/parser/parser.ts";
 import assert from "node:assert";
 import { describe, it } from "node:test";
@@ -13,17 +12,65 @@ const testEvalNode = (input: string) => {
   return Evaluator.evalNode(program);
 };
 
-const testLyricObject = (obj: Obj.t, expected: string) => {
+const testLyricObject = (obj: Song.t, expected: Song.t) => {
   assert.strictEqual(
-    obj["tag"],
-    "lyric",
-    `obj is not a Lyric Object. got=${obj["tag"]}`
+    obj[0]["tag"],
+    expected[0]["tag"],
+    `obj is not a Lyric Object. got=${obj[0]["tag"]}`
   );
-  const lyricObj = obj satisfies Lyric.t;
   assert.strictEqual(
-    lyricObj.value,
-    expected,
-    `lyricObj.value is not '${expected}'. got=${lyricObj.value}`
+    obj[0]["value"],
+    expected[0]["value"],
+    `obj.value is not '${expected[0]["value"]}'. got=${obj[0]["value"]}`
+  );
+};
+
+const testChordObject = (obj: Song.t, expected: Song.t) => {
+  assert.strictEqual(
+    obj[0]["tag"],
+    expected[0]["tag"],
+    `obj is not a Chord Object. got=${obj[0]["tag"]}`
+  );
+  assert.strictEqual(
+    obj[0]["value"],
+    expected[0]["value"],
+    `obj.value is not '${expected[0]["value"]}'. got=${obj[0]["value"]}`
+  );
+};
+
+const testEndoflineObject = (obj: Song.t, expected: Song.t) => {
+  assert.strictEqual(
+    obj[0]["tag"],
+    expected[0]["tag"],
+    `obj is not a Endofline Object. got=${obj[0]["tag"]}`
+  );
+  assert.strictEqual(
+    obj[0]["value"],
+    expected[0]["value"],
+    `obj.value is not '${expected[0]["value"]}'. got=${obj[0]["value"]}`
+  );
+};
+
+const testInfixExpression = (obj: Song.t, expected: Song.t) => {
+  assert.strictEqual(
+    obj[0]["tag"],
+    expected[0]["tag"],
+    `obj[0] is not a lyric Object. got=${obj[0]["tag"]}`
+  );
+  assert.strictEqual(
+    obj[0]["value"],
+    expected[0]["value"],
+    `obj[0].value is not a ${expected[0]["value"]}. got=${obj[0]["value"]}`
+  );
+  assert.strictEqual(
+    obj[1]["tag"],
+    expected[1]["tag"],
+    `obj[1] is not a chord Object. got=${obj[1]["tag"]}`
+  );
+  assert.strictEqual(
+    obj[1]["value"],
+    expected[1]["value"],
+    `obj[1] is not a ${expected[1]["value"]}. got=${obj[1]["value"]}`
   );
 };
 
@@ -32,13 +79,70 @@ describe("evaluator", () => {
     const tests = [
       {
         input: "ab c",
-        expected: "ab c",
+        expected: [
+          {
+            tag: "lyric",
+            value: "ab c",
+          },
+        ] satisfies Song.t,
       },
     ];
     for (const tt of tests) {
       const evaluated = testEvalNode(tt.input);
       assert.ok(evaluated, "evaluated is null");
       testLyricObject(evaluated, tt.expected);
+    }
+  });
+  it("TestEvalChordLiteral", () => {
+    const tests = [
+      {
+        input: "[C]",
+        expected: [
+          {
+            tag: "chord",
+            value: "C",
+          },
+        ] satisfies Song.t,
+      },
+    ];
+    for (const tt of tests) {
+      const evaluated = testEvalNode(tt.input);
+      assert.ok(evaluated, "evaluated is null");
+      testChordObject(evaluated, tt.expected);
+    }
+  });
+  it("TestEvalEndoflineLiteral", () => {
+    const tests = [
+      {
+        input: "\n",
+        expected: [
+          {
+            tag: "endofline",
+            value: "\n",
+          },
+        ] satisfies Song.t,
+      },
+    ];
+    for (const tt of tests) {
+      const evaluated = testEvalNode(tt.input);
+      assert.ok(evaluated, "evaluated is null");
+      testEndoflineObject(evaluated, tt.expected);
+    }
+  });
+  it("TestEvalInfixExpression", () => {
+    const tests = [
+      {
+        input: "abc[C]",
+        expected: [
+          { tag: "lyric", value: "abc" },
+          { tag: "chord", value: "C" },
+        ] satisfies Song.t,
+      },
+    ];
+    for (const tt of tests) {
+      const evaluated = testEvalNode(tt.input);
+      assert.ok(evaluated, "evaluated is null");
+      testInfixExpression(evaluated, tt.expected);
     }
   });
 });

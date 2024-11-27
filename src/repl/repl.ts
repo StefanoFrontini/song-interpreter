@@ -1,6 +1,5 @@
 import * as Evaluator from "#root/src/evaluator/evaluator.ts";
 import * as Lexer from "#root/src/lexer/lexer.ts";
-import * as Obj from "#root/src/object/obj.ts";
 import * as Parser from "#root/src/parser/parser.ts";
 import { stdin as input, stdout as output } from "node:process";
 import * as readline from "node:readline/promises";
@@ -26,7 +25,7 @@ export const start = async (): Promise<void> => {
     }
     const evaluated = Evaluator.evalNode(program);
     if (evaluated) {
-      console.log(Obj.inspect(evaluated));
+      console.log(evaluated);
     }
   }
 };
