@@ -7,6 +7,7 @@ import * as Statement from "#root/src/ast/statement.ts";
 import * as StringLiteral from "#root/src/ast/stringLiteral.ts";
 import * as Lexer from "#root/src/lexer/lexer.ts";
 import * as Token from "#root/src/token/token.ts";
+
 const LOWEST = 1,
   EQUALS = 2;
 
